@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 export interface Anamenu {
   id: number;
@@ -8,17 +8,31 @@ export interface Anamenu {
   sira: number;
   yetki_ids?: string;
   menuler?: Menu[];
+  altAnamenuler?: AltAnamenu[];
+}
+
+export interface AltAnamenu {
+  id: number;
+  alt_anamenu: string;
+  anamenu_id: number;
+  ikon?: string;
+  sira: number;
+  yetki_ids?: string;
+  anamenu?: Anamenu;
+  menuler?: Menu[];
 }
 
 export interface Menu {
   id: number;
   menu: string;
-  anamenu_id: number;
+  anamenu_id?: number;
+  alt_anamenu_id?: number;
   rota: string;
   ikon?: string;
   sira: number;
   yetki_ids?: string;
   anamenu?: Anamenu;
+  altAnamenu?: AltAnamenu;
 }
 
 export async function getAnamenuler(): Promise<Anamenu[]> {

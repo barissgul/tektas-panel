@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Title, Text, Button, Input } from 'rizzui';
 import cn from '@core/utils/class-names';
@@ -9,14 +9,29 @@ import {
   PiCheckCircleDuotone,
   PiXCircleDuotone,
 } from 'react-icons/pi';
+import {
+  getTrendyolConfigs,
+  createTrendyolConfig,
+  updateTrendyolConfig,
+  testTrendyolConnection,
+  type TrendyolConfig,
+} from '@/services/trendyol.service';
 
 export default function TrendyolYapilandirma() {
+  const [configs, setConfigs] = useState<TrendyolConfig[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentConfig, setCurrentConfig] = useState<TrendyolConfig | null>(null);
+  
   const [formData, setFormData] = useState({
+    magaza_adi: 'Trendyol',
     magaza_kodu: '',
-    supplier_id: '',
+    api_url: 'https://apigw.trendyol.com',
     api_key: '',
     api_secret: '',
+    satici_id: '',
+    baglanti_turu: 'REST',
     aktif: true,
+    notlar: '',
   });
 
   const [testResult, setTestResult] = useState<{
@@ -24,18 +39,91 @@ export default function TrendyolYapilandirma() {
     message: string;
   } | null>(null);
 
+  // Config'leri yükle
+  useEffect(() => {
+    loadConfigs();
+  }, []);
+
+  const loadConfigs = async () => {
+    try {
+      setLoading(true);
+      const data = await getTrendyolConfigs();
+      setConfigs(data);
+      
+      // İlk config'i form'a yükle
+      if (data.length > 0) {
+        const config = data[0];
+        setCurrentConfig(config);
+        setFormData({
+          magaza_adi: config.magaza_adi,
+          magaza_kodu: config.magaza_kodu,
+          api_url: config.api_url,
+          api_key: config.api_key,
+          api_secret: config.api_secret || '',
+          satici_id: config.satici_id,
+          baglanti_turu: config.baglanti_turu,
+          aktif: config.aktif,
+          notlar: config.notlar || '',
+        });
+      }
+    } catch (error) {
+      console.error('Config yükleme hatası:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // API çağrısı buraya gelecek
-    console.log('Form Data:', formData);
+    
+    try {
+      if (currentConfig) {
+        // Güncelle
+        await updateTrendyolConfig(currentConfig.id, formData);
+        setTestResult({
+          success: true,
+          message: 'Config başarıyla güncellendi!',
+        });
+      } else {
+        // Yeni oluştur
+        await createTrendyolConfig(formData);
+        setTestResult({
+          success: true,
+          message: 'Config başarıyla oluşturuldu!',
+        });
+      }
+      
+      // Listeyi yenile
+      await loadConfigs();
+    } catch (error: any) {
+      setTestResult({
+        success: false,
+        message: error.message || 'Bir hata oluştu',
+      });
+    }
   };
 
   const handleTest = async () => {
-    // API test çağrısı
-    setTestResult({
-      success: true,
-      message: 'Bağlantı başarılı! API çalışıyor.',
-    });
+    if (!formData.magaza_kodu) {
+      setTestResult({
+        success: false,
+        message: 'Önce mağaza kodu girin',
+      });
+      return;
+    }
+
+    try {
+      await testTrendyolConnection(formData.magaza_kodu);
+      setTestResult({
+        success: true,
+        message: 'Bağlantı başarılı! Kategoriler çekildi.',
+      });
+    } catch (error: any) {
+      setTestResult({
+        success: false,
+        message: 'Bağlantı başarısız: ' + (error.message || 'Bilinmeyen hata'),
+      });
+    }
   };
 
   return (
@@ -68,12 +156,13 @@ export default function TrendyolYapilandirma() {
                 </label>
                 <Input
                   type="text"
-                  placeholder="Örn: MAGAZA001"
+                  placeholder="Örn: TRENDYOL_MAGAZA"
                   value={formData.magaza_kodu}
                   onChange={(e) =>
                     setFormData({ ...formData, magaza_kodu: e.target.value })
                   }
                   className="w-full"
+                  disabled={loading}
                 />
                 <Text className="mt-1 text-xs text-gray-500">
                   Benzersiz mağaza tanımlayıcı kodunuz
@@ -82,16 +171,17 @@ export default function TrendyolYapilandirma() {
 
               <div>
                 <label className="mb-2 block text-sm font-medium">
-                  Supplier ID <span className="text-red-500">*</span>
+                  Satıcı ID <span className="text-red-500">*</span>
                 </label>
                 <Input
                   type="text"
-                  placeholder="Örn: 123456"
-                  value={formData.supplier_id}
+                  placeholder="Örn: 556267"
+                  value={formData.satici_id}
                   onChange={(e) =>
-                    setFormData({ ...formData, supplier_id: e.target.value })
+                    setFormData({ ...formData, satici_id: e.target.value })
                   }
                   className="w-full"
+                  disabled={loading}
                 />
                 <Text className="mt-1 text-xs text-gray-500">
                   Trendyol Satıcı Panelinden alınan Supplier ID
@@ -110,6 +200,7 @@ export default function TrendyolYapilandirma() {
                     setFormData({ ...formData, api_key: e.target.value })
                   }
                   className="w-full"
+                  disabled={loading}
                 />
                 <Text className="mt-1 text-xs text-gray-500">
                   API entegrasyonu için gerekli key
@@ -128,6 +219,7 @@ export default function TrendyolYapilandirma() {
                     setFormData({ ...formData, api_secret: e.target.value })
                   }
                   className="w-full"
+                  disabled={loading}
                 />
                 <Text className="mt-1 text-xs text-gray-500">
                   API güvenlik anahtarı (şifrelenmiş saklanır)
@@ -179,14 +271,15 @@ export default function TrendyolYapilandirma() {
 
               {/* Actions */}
               <div className="flex gap-3 pt-2">
-                <Button type="submit" className="flex-1">
-                  Kaydet
+                <Button type="submit" className="flex-1" disabled={loading}>
+                  {currentConfig ? 'Güncelle' : 'Kaydet'}
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
                   onClick={handleTest}
                   className="flex-1"
+                  disabled={loading}
                 >
                   Bağlantıyı Test Et
                 </Button>
@@ -222,19 +315,21 @@ export default function TrendyolYapilandirma() {
             <div className="space-y-3">
               <ConfigItem
                 label="Toplam Config"
-                value="1"
+                value={configs.length.toString()}
                 status="active"
               />
               <ConfigItem
                 label="Aktif Bağlantı"
-                value="1"
+                value={configs.filter(c => c.aktif).length.toString()}
                 status="active"
               />
-              <ConfigItem
-                label="Son Güncelleme"
-                value="Bugün, 14:30"
-                status="info"
-              />
+              {currentConfig && (
+                <ConfigItem
+                  label="Son Güncelleme"
+                  value={new Date(currentConfig.guncelleme_tarihi).toLocaleDateString('tr-TR')}
+                  status="info"
+                />
+              )}
             </div>
           </div>
 
@@ -249,16 +344,22 @@ export default function TrendyolYapilandirma() {
                   Base URL
                 </Text>
                 <span className="text-xs font-mono text-gray-900 dark:text-gray-100">
-                  api.trendyol.com
+                  {formData.api_url || 'apigw.trendyol.com'}
                 </span>
               </div>
               <div className="flex items-center justify-between">
                 <Text className="text-sm text-gray-600 dark:text-gray-400">
                   Bağlantı
                 </Text>
-                <span className="inline-flex items-center gap-1 text-xs font-medium text-green-600">
-                  <span className="h-2 w-2 rounded-full bg-green-600"></span>
-                  Aktif
+                <span className={cn(
+                  "inline-flex items-center gap-1 text-xs font-medium",
+                  currentConfig?.aktif ? "text-green-600" : "text-red-600"
+                )}>
+                  <span className={cn(
+                    "h-2 w-2 rounded-full",
+                    currentConfig?.aktif ? "bg-green-600" : "bg-red-600"
+                  )}></span>
+                  {currentConfig?.aktif ? 'Aktif' : 'Pasif'}
                 </span>
               </div>
               <div className="flex items-center justify-between">
