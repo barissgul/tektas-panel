@@ -39,7 +39,7 @@ export default function SearchList({ onClose }: { onClose?: () => void }) {
           value={searchText}
           ref={inputRef}
           onChange={(e) => setSearchText(() => e.target.value)}
-          placeholder="Search pages here"
+          placeholder="Sayfaları burada arayınız"
           className="flex-1"
           prefix={<PiMagnifyingGlassBold className="h-[18px] w-[18px] text-gray-600" />}
           suffix={
@@ -74,7 +74,7 @@ export default function SearchList({ onClose }: { onClose?: () => void }) {
             <Empty
               className="scale-75"
               image={<SearchNotFoundIcon />}
-              text="No Result Found"
+              text="Sonuç Bulunamadı"
               textClassName="text-xl"
             />
           ) : (
@@ -82,7 +82,7 @@ export default function SearchList({ onClose }: { onClose?: () => void }) {
               as="h6"
               className="mb-5 px-3 font-semibold dark:text-gray-700"
             >
-              Quick Page Links
+              Hızlı Sayfa Bağlantıları
             </Title>
           )}
         </>

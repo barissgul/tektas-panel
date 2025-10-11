@@ -145,4 +145,18 @@ export const routes = {
     otp5: "/auth/otp-5",
   },
   signIn: "/giris",
+  tektas: {
+    dashboard: "/tektas",
+    products: "/tektas/urunler",
+  },
+  trendyol: {
+    dashboard: "/trendyol",
+    orders: "/trendyol/siparisler",
+    stockPrice: "/trendyol/stok-fiyat",
+    products: "/trendyol/urunler",
+    config: "/trendyol/yapilandirma",
+  },
+  sanalMagaza: {
+    dashboard: "/sanal-magaza",
+  },
 };

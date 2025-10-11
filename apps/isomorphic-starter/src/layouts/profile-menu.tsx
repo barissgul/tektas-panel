@@ -3,7 +3,7 @@
 import { Title, Text, Avatar, Button, Popover } from "rizzui";
 import cn from "@core/utils/class-names";
 import { routes } from "@/config/routes";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -17,6 +17,9 @@ export default function ProfileMenu({
   avatarClassName?: string;
   username?: boolean;
 }) {
+  const { data: session } = useSession();
+  const user = session?.user;
+
   return (
     <ProfileMenuPopover>
       <Popover.Trigger>
@@ -27,13 +30,13 @@ export default function ProfileMenu({
           )}
         >
           <Avatar
-            src="https://isomorphic-furyroad.s3.amazonaws.com/public/avatars/avatar-11.webp"
-            name="John Doe"
+            src={user?.image || "https://isomorphic-furyroad.s3.amazonaws.com/public/avatars/avatar-11.webp"}
+            name={user?.name || "Kullanıcı"}
             className={cn("!h-9 w-9 sm:!h-10 sm:!w-10", avatarClassName)}
           />
           {!!username && (
             <span className="username hidden text-gray-200 dark:text-gray-700 md:inline-flex">
-              Hi, Andry
+              Merhaba, {user?.name || "Kullanıcı"}
             </span>
           )}
         </button>
@@ -68,35 +71,38 @@ function ProfileMenuPopover({ children }: React.PropsWithChildren<{}>) {
 
 const menuItems = [
   {
-    name: "My Profile",
+    name: "Profilim",
     href: routes.profile,
   },
   {
-    name: "Account Settings",
+    name: "Hesap Ayarları",
     href: routes.forms.profileSettings,
   },
   {
-    name: "Activity Log",
+    name: "Aktivite Günlüğü",
     href: "#",
   },
 ];
 
 function DropdownMenu() {
+  const { data: session } = useSession();
+  const user = session?.user;
+
   return (
     <div className="w-64 text-left rtl:text-right">
       <div className="flex items-center border-b border-gray-300 px-6 pb-5 pt-6">
         <Avatar
-          src="https://isomorphic-furyroad.s3.amazonaws.com/public/avatars/avatar-11.webp"
-          name="Albert Flores"
+          src={user?.image || "https://isomorphic-furyroad.s3.amazonaws.com/public/avatars/avatar-11.webp"}
+          name={user?.name || "Kullanıcı"}
         />
         <div className="ms-3">
           <Title
             as="h6"
             className="font-semibold"
           >
-            Albert Flores
+            {user?.name || "Kullanıcı"}
           </Title>
-          <Text className="text-gray-600">flores@doe.io</Text>
+          <Text className="text-gray-600">{user?.email || "email@example.com"}</Text>
         </div>
       </div>
       <div className="grid px-3.5 py-3.5 font-medium text-gray-700">
@@ -116,7 +122,7 @@ function DropdownMenu() {
           variant="text"
           onClick={() => signOut()}
         >
-          Sign Out
+          Çıkış Yap
         </Button>
       </div>
     </div>
