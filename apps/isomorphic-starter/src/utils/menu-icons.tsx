@@ -13,6 +13,7 @@ import {
   PiChartLine,
   PiPackage,
   PiStore,
+  PiCurrencyDollar,
 } from 'react-icons/pi';
 
 // İkon eşleştirme map'i
@@ -31,15 +32,16 @@ export const iconMap: Record<string, React.ReactElement> = {
   PiChartLine: <PiChartLine />,
   PiPackage: <PiPackage />,
   PiStore: <PiStore />,
+  PiCurrencyDollar: <PiCurrencyDollar />,
 };
 
 // Varsayılan ikon
 export const defaultIcon = <PiFolder />;
 
 // İkon adından ikon elementi döndür
-export function getIconByName(iconName?: string): React.ReactElement {
-  if (!iconName) return defaultIcon;
-  return iconMap[iconName] || defaultIcon;
+export function getIconByName(iconName?: string): React.ReactElement | undefined {
+  if (!iconName) return undefined;
+  return iconMap[iconName] || undefined;
 }
 
 

@@ -48,19 +48,22 @@ function transformToMenuItems(anamenuler: Anamenu[]): MenuItem[] {
       name: anamenu.anamenu,
     });
 
+    // İkon güvenli şekilde al
+    const icon = anamenu.ikon ? getIconByName(anamenu.ikon) : undefined;
+
     // Eğer alt menü yoksa, ana menüyü direkt link olarak ekle
     if (!anamenu.menuler || anamenu.menuler.length === 0) {
       items.push({
         name: anamenu.anamenu,
         href: anamenu.rota,
-        icon: getIconByName(anamenu.ikon),
+        icon: icon,
       });
     } else {
       // Alt menüler varsa dropdown olarak ekle
       items.push({
         name: anamenu.anamenu,
         href: '#',
-        icon: getIconByName(anamenu.ikon),
+        icon: icon,
         dropdownItems: anamenu.menuler.map((menu) => ({
           name: menu.menu,
           href: menu.rota,
