@@ -5,11 +5,11 @@ import { messagesData } from "@/data/messages";
 import { useMedia } from "@core/hooks/use-media";
 import cn from "@core/utils/class-names";
 import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-import Link from "next/link";
-import { ReactElement, RefObject, useState } from "react";
+import relativeTime from 'dayjs/plugin/relativeTime';
+import Link from 'next/link';
+import { ReactElement, RefObject, useState } from 'react';
 import { PiCheck } from "react-icons/pi";
-import { Avatar, Badge, Popover, Text, Title } from "rizzui";
+import { Avatar, Badge, Popover, Text, Title } from 'rizzui';
 
 dayjs.extend(relativeTime);
 
@@ -19,33 +19,33 @@ function MessagesList({
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   return (
-    <div className="w-[320px] text-left sm:w-[360px] 2xl:w-[420px] rtl:text-right">
-      <div className="mb-2 flex items-center justify-between ps-6">
+    <div className='w-[320px] text-left sm:w-[360px] 2xl:w-[420px] rtl:text-right'>
+      <div className='mb-2 flex items-center justify-between ps-6'>
         <Title as="h5" fontWeight="semibold">
-          Messages
+          Mesajlar
         </Title>
         <Link
           href={routes.support.inbox}
           onClick={() => setIsOpen(false)}
-          className="hover:underline"
+          className='hover:underline'
         >
-          View all
+          Tümünü Gör
         </Link>
       </div>
-      <div className="custom-scrollbar overflow-y-auto scroll-smooth max-h-[406px]">
-        <div className="grid grid-cols-1 ps-4">
+      <div className='custom-scrollbar overflow-y-auto scroll-smooth max-h-[406px]'>
+        <div className='grid grid-cols-1 ps-4'>
           {messagesData.map((item) => (
             <div
               key={item.name + item.id}
-              className="group grid cursor-pointer grid-cols-[auto_minmax(0,1fr)] gap-2.5 rounded-md px-2 py-2.5 pe-3 transition-colors hover:bg-gray-100 dark:hover:bg-gray-50"
+              className='group grid cursor-pointer grid-cols-[auto_minmax(0,1fr)] gap-2.5 rounded-md px-2 py-2.5 pe-3 transition-colors hover:bg-gray-100 dark:hover:bg-gray-50'
             >
-              <div className={cn("relative", item.avatar.length > 1 && "me-1")}>
+              <div className={cn('relative', item.avatar.length > 1 && 'me-1')}>
                 <Avatar
                   src={item.avatar[0]}
                   name={item.name}
                   className={cn(
                     item.avatar.length > 1 &&
-                      "relative -end-1 -top-0.5 !h-9 !w-9"
+                      'relative -end-1 -top-0.5 !h-9 !w-9'
                   )}
                 />
                 {item.avatar.length > 1 && (

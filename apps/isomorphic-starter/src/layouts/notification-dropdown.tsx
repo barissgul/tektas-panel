@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { notificationsData } from "@/data/notifications";
-import { useMedia } from "@core/hooks/use-media";
+import { notificationsData } from '@/data/notifications';
+import { useMedia } from '@core/hooks/use-media';
 import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-import Link from "next/link";
-import { ReactElement, RefObject, useState } from "react";
+import relativeTime from 'dayjs/plugin/relativeTime';
+import Link from 'next/link';
+import { ReactElement, RefObject, useState } from 'react';
 import { PiCheck } from "react-icons/pi";
-import { Badge, Checkbox, Popover, Text, Title } from "rizzui";
+import { Badge, Checkbox, Popover, Text, Title } from 'rizzui';
 
 dayjs.extend(relativeTime);
 
@@ -20,11 +20,11 @@ function NotificationsList({
     <div className="w-[320px] text-left sm:w-[360px] 2xl:w-[420px] rtl:text-right">
       <div className="mb-3 flex items-center justify-between ps-6">
         <Title as="h5" fontWeight="semibold">
-          Notifications
+          Bildirimler
         </Title>
         <Checkbox
           size="sm"
-          label="Mark all as read"
+          label="Tümünü okundu olarak işaretle"
           labelWeight="normal"
           labelClassName="text-sm"
         />
@@ -68,11 +68,11 @@ function NotificationsList({
         </div>
       </div>
       <Link
-        href={"#"}
+        href={'#'}
         onClick={() => setIsOpen(false)}
         className="-me-6 block px-6 pb-0.5 pt-3 text-center hover:underline"
       >
-        View All Activity
+        Tümünü Gör
       </Link>
     </div>
   );
@@ -83,14 +83,14 @@ export default function NotificationDropdown({
 }: {
   children: ReactElement & { ref?: RefObject<any> };
 }) {
-  const isMobile = useMedia("(max-width: 480px)", false);
+  const isMobile = useMedia('(max-width: 480px)', false);
   const [isOpen, setIsOpen] = useState(false);
   return (
     <Popover
       isOpen={isOpen}
       setIsOpen={setIsOpen}
       shadow="sm"
-      placement={isMobile ? "bottom" : "bottom-end"}
+      placement={isMobile ? 'bottom' : 'bottom-end'}
     >
       <Popover.Trigger>{children}</Popover.Trigger>
       <Popover.Content className="z-[9999] px-0 pb-4 pe-6 pt-5 dark:bg-gray-100 [&>svg]:hidden [&>svg]:dark:fill-gray-100 sm:[&>svg]:inline-flex">

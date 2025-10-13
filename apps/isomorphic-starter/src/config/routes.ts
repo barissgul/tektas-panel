@@ -159,4 +159,9 @@ export const routes = {
   sanalMagaza: {
     dashboard: "/sanal-magaza",
   },
+  tanimlama: {
+    markalar: "/tanimlama/markalar",
+    createMarka: "/tanimlama/markalar/create",
+    editMarka: (id: string) => `/tanimlama/markalar/${id}/edit`,
+  },
 };

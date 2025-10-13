@@ -25,7 +25,7 @@ export const DEFAULT_PRESET_COLORS = {
   foreground: '#ffffff',
 };
 
-export const DEFAULT_PRESET_COLOR_NAME = 'Blue';
+export const DEFAULT_PRESET_COLOR_NAME = 'Mavi';
 
 export const usePresets = () => {
   const { theme } = useTheme();
@@ -36,7 +36,7 @@ export const usePresets = () => {
       colors: DEFAULT_PRESET_COLORS,
     },
     {
-      name: 'Black',
+      name: 'Siyah',
       colors: {
         lighter: theme === 'light' ? presetLight.lighter : presetDark.lighter,
         light: theme === 'light' ? presetLight.light : presetDark.light,
@@ -47,7 +47,7 @@ export const usePresets = () => {
       },
     },
     {
-      name: 'Teal',
+      name: 'Yeşil',
       colors: {
         lighter: '#ccfbf1', // Teal 100
         light: '#5eead4', // Teal 300
@@ -57,7 +57,7 @@ export const usePresets = () => {
       },
     },
     {
-      name: 'Violet',
+      name: 'Mor',
       colors: {
         lighter: '#ede9fe', // Violet 100
         light: '#a5b4fc', // Violet 300
@@ -67,7 +67,7 @@ export const usePresets = () => {
       },
     },
     {
-      name: 'Rose',
+      name: 'Kırmızı',
       colors: {
         lighter: '#ffe4e6', // Rose 100
         light: '#fda4af', // Rose 300
@@ -77,7 +77,7 @@ export const usePresets = () => {
       },
     },
     {
-      name: 'Yellow',
+      name: 'Sarı',
       colors: {
         lighter: '#fef9c3', // Yellow 100
         light: '#fde047', // Yellow 300
