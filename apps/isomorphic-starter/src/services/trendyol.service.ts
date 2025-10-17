@@ -17,15 +17,30 @@ export interface TrendyolConfig {
 
 export async function getTrendyolConfigs(): Promise<TrendyolConfig[]> {
   try {
-    const response = await fetch(`${API_URL}/trendyol/config`, {
+    const url = `${API_URL}/trendyol/config`;
+    console.log('Config API URL:', url);
+    
+    const response = await fetch(url, {
       cache: 'no-store',
     });
     
+    console.log('Config Response status:', response.status);
+    console.log('Config Response ok:', response.ok);
+    
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Config API Error:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText,
+        url: url
+      });
       throw new Error('Config verileri alınamadı');
     }
     
-    return response.json();
+    const data = await response.json();
+    console.log('Config Response data:', data);
+    return data;
   } catch (error) {
     console.error('Trendyol config fetch error:', error);
     return [];
@@ -113,6 +128,108 @@ export async function testTrendyolConnection(magazaKodu: string): Promise<any> {
     return await response.json();
   } catch (error) {
     console.error('Trendyol connection test error:', error);
+    throw error;
+  }
+}
+
+// Ürün tipleri
+export interface TrendyolProduct {
+  id: string;
+  title: string;
+  description: string;
+  barcode: string;
+  brand: string;
+  categoryId: number;
+  salePrice: number;
+  listPrice: number;
+  quantity: number;
+  productCode: string;
+  stockCode: string;
+  images: { url: string }[];
+}
+
+export interface TrendyolProductListResponse {
+  content: TrendyolProduct[];
+  totalPages: number;
+  totalElements: number;
+  page: number;
+  size: number;
+}
+
+// Ürünleri getir
+export async function getTrendyolProducts(
+  magazaKodu: string,
+  page: number = 0,
+  size: number = 50
+): Promise<TrendyolProductListResponse> {
+  try {
+    const url = `${API_URL}/trendyol/${magazaKodu}/products?page=${page}&size=${size}`;
+    console.log('API URL:', url);
+    console.log('Mağaza Kodu:', magazaKodu);
+    
+    const response = await fetch(url, {
+      cache: 'no-store',
+    });
+
+    console.log('Response status:', response.status);
+    console.log('Response ok:', response.ok);
+    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText.substring(0, 500) + '...', // Sadece ilk 500 karakter
+        url: url
+      });
+      
+      let errorMessage = 'Ürünler alınamadı';
+      
+      // HTML yanıt kontrolü (Cloudflare blok sayfası)
+      if (errorText.includes('Cloudflare') || errorText.includes('<!DOCTYPE html>')) {
+        errorMessage = 'Trendyol API erişim izni reddedildi. API anahtarlarınızı kontrol edin.';
+      } else {
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.message || errorMessage;
+        } catch {
+          errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        }
+      }
+      
+      throw new Error(errorMessage);
+    }
+
+    const data = await response.json();
+    console.log('API Response data:', data);
+    return data;
+  } catch (error) {
+    console.error('Trendyol products fetch error:', error);
+    throw error;
+  }
+}
+
+// Tek ürün getir
+export async function getTrendyolProductById(
+  magazaKodu: string,
+  productId: string
+): Promise<TrendyolProduct> {
+  try {
+    const response = await fetch(
+      `${API_URL}/trendyol/${magazaKodu}/products/${productId}`,
+      {
+        cache: 'no-store',
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Ürün alınamadı');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Trendyol product fetch error:', error);
     throw error;
   }
 }

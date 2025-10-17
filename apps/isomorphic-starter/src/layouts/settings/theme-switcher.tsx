@@ -40,7 +40,7 @@ export default function ThemeSwitcher() {
   }, [theme, colorPresetName]);
 
   return (
-    <DrawerBlock title="Appearance">
+    <DrawerBlock title="Tema Seçim">
       <RadioGroup
         value={theme ?? siteConfig.mode}
         setValue={(selectedTheme: any) => {
