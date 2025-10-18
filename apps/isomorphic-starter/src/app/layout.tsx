@@ -10,6 +10,7 @@ import { Toaster } from 'react-hot-toast';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/auth-options';
 import AuthProvider from '@/app/api/auth/[...nextauth]/auth-provider';
+import SessionChecker from '@/app/api/auth/[...nextauth]/session-checker';
 import { siteConfig } from '@/config/site.config';
 
 import 'swiper/css';
@@ -39,6 +40,7 @@ export default async function RootLayout({
         className={cn(inter.variable, lexendDeca.variable, 'font-inter')}
       >
         <AuthProvider session={session}>
+          <SessionChecker />
           <ThemeProvider>
             <NextProgress />
             <JotaiProvider>

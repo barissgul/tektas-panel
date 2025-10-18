@@ -3,7 +3,6 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 export interface Anamenu {
   id: number;
   anamenu: string;
-  rota: string;
   ikon?: string;
   sira: number;
   yetki_ids?: string;
@@ -15,6 +14,7 @@ export interface AltAnamenu {
   id: number;
   alt_anamenu: string;
   anamenu_id: number;
+  rota?: string;
   ikon?: string;
   sira: number;
   yetki_ids?: string;

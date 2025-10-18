@@ -66,10 +66,11 @@ function transformToMenuItems(anamenuler: Anamenu[]): MenuItem[] {
             })),
           });
         } else {
-          // Alt anamenu altında menü yoksa, kendisini link olarak ekle
+          // Alt anamenu altında menü yoksa, alt anamenu'nun rotasını kullan
+          const rota = altAnamenu.rota;
           items.push({
             name: altAnamenu.alt_anamenu,
-            href: '#',
+            href: rota ? (rota.startsWith('/') ? rota : '/' + rota) : '#',
             icon: icon,
           });
         }

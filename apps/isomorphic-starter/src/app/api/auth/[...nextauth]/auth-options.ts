@@ -12,7 +12,23 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 24 * 60 * 60, // 24 saat JWT token için
+    updateAge: 0, // Her istekte session güncelleme
+  },
+  useSecureCookies: process.env.NODE_ENV === 'production',
+  cookies: {
+    sessionToken: {
+      name: process.env.NODE_ENV === 'production' 
+        ? '__Secure-next-auth.session-token'
+        : 'next-auth.session-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+        // Tarayıcı kapanınca silinsin diye expires ayarlama
+      },
+    },
   },
   callbacks: {
     async session({ session, token }) {
@@ -32,6 +48,11 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async redirect({ url, baseUrl }) {
+      // Çıkış yapılıyorsa direkt /giris'e yönlendir
+      if (url.includes('/api/auth/signout') || url === '/giris') {
+        return `${baseUrl}/giris`;
+      }
+      
       // Eğer NEXTAUTH_URL tanımlıysa onu kullan, yoksa baseUrl kullan
       const redirectBase = process.env.NEXTAUTH_URL || baseUrl;
       
@@ -49,6 +70,12 @@ export const authOptions: NextAuthOptions = {
       return redirectBase;
     },
   },
+  events: {
+    async signOut() {
+      // Çıkış yapıldığında ekstra temizlik işlemleri
+      console.log('Kullanıcı çıkış yaptı');
+    },
+  },
   providers: [
     CredentialsProvider({
       id: 'credentials',
@@ -56,7 +83,7 @@ export const authOptions: NextAuthOptions = {
       credentials: {},
       async authorize(credentials: any) {
         try {
-          const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+          const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
           
           // API'ye login isteği gönder
           const response = await fetch(`${API_URL}/kullanicilar/login`, {

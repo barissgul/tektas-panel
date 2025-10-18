@@ -14,7 +14,7 @@ import toast from 'react-hot-toast';
 const initialValues: LoginSchema = {
   email: 'barisgul',
   password: '123456',
-  rememberMe: true,
+  rememberMe: false,
 };
 
 export default function SignInForm() {
@@ -37,6 +37,10 @@ export default function SignInForm() {
       if (result?.error) {
         toast.error('Giriş başarısız: Kullanıcı adı veya şifre hatalı!');
       } else if (result?.ok) {
+        // sessionStorage'a giriş zamanını kaydet (tarayıcı kapanınca silinir)
+        sessionStorage.setItem('auth_session', Date.now().toString());
+        sessionStorage.setItem('auth_active', 'true');
+        
         toast.success('Giriş başarılı! Yönlendiriliyorsunuz...');
         // Başarılı giriş sonrası yönlendirme
         window.location.href = '/';

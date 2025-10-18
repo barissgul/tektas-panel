@@ -11,28 +11,22 @@ export interface MarkalarResponse {
   data: Marka[];
   meta: {
     total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
   };
 }
 
-export async function getMarkalar(
-  page: number = 1,
-  limit: number = 12,
-  search?: string
-): Promise<MarkalarResponse> {
+export async function getMarkalar(search?: string): Promise<MarkalarResponse> {
   try {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      limit: limit.toString(),
-    });
+    const params = new URLSearchParams();
     
     if (search) {
       params.append('search', search);
     }
 
-    const response = await fetch(`${API_URL}/markalar?${params}`, {
+    const url = search 
+      ? `${API_URL}/markalar?${params}` 
+      : `${API_URL}/markalar`;
+
+    const response = await fetch(url, {
       cache: 'no-store',
     });
     
@@ -47,9 +41,6 @@ export async function getMarkalar(
       data: [],
       meta: {
         total: 0,
-        page: 1,
-        limit: 12,
-        totalPages: 0,
       },
     };
   }

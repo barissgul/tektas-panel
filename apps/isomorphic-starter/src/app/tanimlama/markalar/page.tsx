@@ -12,18 +12,17 @@ import {
   PiImageDuotone,
 } from 'react-icons/pi';
 import { getMarkalar, deleteMarka, type Marka } from '@/services/marka.service';
-import Image from 'next/image';
 import Link from 'next/link';
 import { routes } from '@/config/routes';
 import { useDebounce } from 'core/src/hooks/use-debounce';
+import MarkaLogo from '@/components/marka-logo';
+import { useTabloPagination } from '@/hooks/use-table-pagination';
 
 export default function MarkalarPage() {
-  const [markalar, setMarkalar] = useState<Marka[]>([]);
+  const [tumMarkalar, setTumMarkalar] = useState<Marka[]>([]);
+  const [filteredMarkalar, setFilteredMarkalar] = useState<Marka[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(12);
-  const [totalItems, setTotalItems] = useState(0);
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; marka: Marka | null }>({
     isOpen: false,
     marka: null,
@@ -31,42 +30,54 @@ export default function MarkalarPage() {
 
   const debouncedSearch = useDebounce(searchTerm, 500);
 
-  const loadMarkalar = useCallback(async (page: number, search?: string) => {
+  // Tüm markaları yükle (backend tüm verileri döndürüyor)
+  const loadMarkalar = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await getMarkalar(page, pageSize, search);
-      setMarkalar(response.data);
-      setTotalItems(response.meta.total);
+      const response = await getMarkalar();
+      setTumMarkalar(response.data);
+      setFilteredMarkalar(response.data);
     } catch (error) {
       console.error('Marka yükleme hatası:', error);
     } finally {
       setLoading(false);
     }
-  }, [pageSize]);
+  }, []);
 
+  // İlk yükleme
   useEffect(() => {
-    loadMarkalar(1, debouncedSearch);
-    setCurrentPage(1);
-  }, [debouncedSearch, loadMarkalar]);
+    loadMarkalar();
+  }, [loadMarkalar]);
 
+  // Arama filtresi
   useEffect(() => {
-    if (currentPage > 1) {
-      loadMarkalar(currentPage, debouncedSearch);
+    if (debouncedSearch) {
+      const filtered = tumMarkalar.filter((marka) =>
+        marka.marka.toLowerCase().includes(debouncedSearch.toLowerCase())
+      );
+      setFilteredMarkalar(filtered);
+    } else {
+      setFilteredMarkalar(tumMarkalar);
     }
-  }, [currentPage, debouncedSearch, loadMarkalar]);
+  }, [debouncedSearch, tumMarkalar]);
+
+  // Sayfalama hook'u
+  const {
+    sayfaliVeri,
+    sayfalamaProplari,
+    baslangicIndex,
+    bitisIndex,
+    toplamKayit,
+  } = useTabloPagination(filteredMarkalar, { sayfaBoyutu: 12 });
 
   const handleDelete = async () => {
     if (!deleteModal.marka) return;
     
     const success = await deleteMarka(deleteModal.marka.id);
     if (success) {
-      loadMarkalar(currentPage, debouncedSearch);
+      loadMarkalar();
     }
     setDeleteModal({ isOpen: false, marka: null });
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
   };
 
   return (
@@ -102,13 +113,15 @@ export default function MarkalarPage() {
           <div className="flex items-center justify-between">
             <div>
               <Title as="h4" className="mb-1 text-2xl">
-                {totalItems.toLocaleString('tr-TR')}
+                {toplamKayit.toLocaleString('tr-TR')}
               </Title>
-              <Text className="text-sm text-gray-500">Toplam Aktif Marka</Text>
+              <Text className="text-sm text-gray-500">
+                {searchTerm ? 'Filtrelenmiş Marka' : 'Toplam Aktif Marka'}
+              </Text>
             </div>
             <div className="text-right">
               <Text className="text-sm text-gray-500">
-                Sayfa {currentPage} / {Math.ceil(totalItems / pageSize)}
+                {baslangicIndex}-{bitisIndex} arası gösteriliyor
               </Text>
             </div>
           </div>
@@ -140,7 +153,7 @@ export default function MarkalarPage() {
       {/* Grid */}
       {!loading && (
         <>
-          {markalar.length === 0 ? (
+          {filteredMarkalar.length === 0 ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
                 <PiImageDuotone className="mx-auto h-12 w-12 text-gray-400" />
@@ -152,7 +165,7 @@ export default function MarkalarPage() {
           ) : (
             <>
               <div className="grid gap-6 @xl:grid-cols-2 @3xl:grid-cols-3 @5xl:grid-cols-4">
-                {markalar.map((marka) => (
+                {sayfaliVeri.map((marka) => (
                   <MarkaCard
                     key={marka.id}
                     marka={marka}
@@ -162,17 +175,9 @@ export default function MarkalarPage() {
               </div>
 
               {/* Pagination */}
-              {totalItems > pageSize && (
+              {toplamKayit > sayfalamaProplari.pageSize && (
                 <div className="mt-8 flex justify-center">
-                  <Pagination
-                    total={totalItems}
-                    pageSize={pageSize}
-                    current={currentPage}
-                    onChange={handlePageChange}
-                    showLessItems={true}
-                    prevIconClassName="py-0 text-gray-500 !leading-[26px]"
-                    nextIconClassName="py-0 text-gray-500 !leading-[26px]"
-                  />
+                  <Pagination {...sayfalamaProplari} />
                 </div>
               )}
             </>
@@ -214,19 +219,6 @@ function MarkaCard({
   marka: Marka;
   onDelete: (marka: Marka) => void;
 }) {
-  // URL geçerliliğini kontrol et
-  const isValidUrl = (url: string | undefined) => {
-    if (!url || url.trim() === '') return false;
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
-  const hasValidImage = isValidUrl(marka.resim_url);
-
   return (
     <div className="group relative rounded-lg border border-gray-200 bg-white p-5 transition-all hover:shadow-lg dark:border-gray-700 dark:bg-gray-800">
       {/* Badge */}
@@ -240,20 +232,9 @@ function MarkaCard({
         </Badge>
       </div>
 
-      {/* Logo */}
-      <div className="mb-4 flex h-32 items-center justify-center rounded-lg bg-gray-50 dark:bg-gray-700/50">
-        {hasValidImage ? (
-          <div className="relative h-full w-full p-4">
-            <Image
-              src={marka.resim_url!}
-              alt={marka.marka}
-              fill
-              className="object-contain"
-            />
-          </div>
-        ) : (
-          <PiImageDuotone className="h-12 w-12 text-gray-400" />
-        )}
+      {/* Logo - resim_url'den */}
+      <div className="mb-4 flex h-32 items-center justify-center">
+        <MarkaLogo resimUrl={marka.resim_url} markaAdi={marka.marka} boyut="xl" />
       </div>
 
       {/* İsim */}
